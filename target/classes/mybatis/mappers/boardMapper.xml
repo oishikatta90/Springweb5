@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.spring.web5.dao.BoardMapper">
+	<!-- 게시글 목록 -->
+	<select id="listBoard" resultType="board">
+		<![CDATA[
+			select *
+			from board3
+			order by boardnum desc
+		]]>
+	</select>
+
+	<!-- 게시글 읽기 -->
+	<select id="getBoard" parameterType="int" resultType="board">
+		<![CDATA[
+			select *
+			from board3
+			where
+			boardnum =#{boardnum}
+		]]>
+	</select>
+
+	<!-- 게시글 저장 -->
+	<insert id="insertBoard" parameterType="board">
+		<![CDATA[
+			insert into board3(boardnum, id, title, content)
+			values(board3_seq.nextval, #{id}, #{title}, #{content})
+		]]>
+	</insert>
+	
+	<!--  게시글 수정 -->
+	<update id="updateBoard" parameterType="board">
+		<![CDATA[
+			update board3
+			set
+			title = #{title}, content = #{content}
+			where 
+			boardnum = #{boardnum} and id = #{id}
+		]]>
+	</update>
+</mapper>
