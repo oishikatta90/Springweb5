@@ -73,6 +73,7 @@ pre {
 	width: 600px;
 	height: 50px;
 	text-align: center;
+	margin: auto;
 }
 
 /* 리플 목록 출력 표 */

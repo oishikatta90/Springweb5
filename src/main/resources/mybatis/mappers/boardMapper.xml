@@ -31,8 +31,8 @@
 			values(board3_seq.nextval, #{id}, #{title}, #{content})
 		]]>
 	</insert>
-	
-	<!--  게시글 수정 -->
+
+	<!-- 게시글 수정 -->
 	<update id="updateBoard" parameterType="board">
 		<![CDATA[
 			update board3
@@ -40,6 +40,47 @@
 			title = #{title}, content = #{content}
 			where 
 			boardnum = #{boardnum} and id = #{id}
+		]]>
+	</update>
+
+	<!-- 리플 저장 -->
+	<insert id="insertReply">
+		<![CDATA[
+			insert into reply3 (replynum, boardnum, id, text)
+			values (reply3_seq.nextval, #{boardnum}, #{id}, #{text})
+		]]>
+
+	</insert>
+
+	<!-- 리플 목록 가져오기 -->
+	<select id="listReply" parameterType="int" resultType="reply">
+		<![CDATA[
+			select * from reply3
+			where
+			boardnum = #{boardnum}
+			order by replynum desc
+		]]>
+	</select>
+
+	<!-- 리플 삭제 -->
+	<delete id="deleteReply" parameterType="reply">
+		<![CDATA[
+			delete from reply3
+			where
+			replynum = #{replynum}
+			and
+			id = #{id}
+		]]>
+	</delete>
+	
+	<!--  댓글 수정 -->
+	<update id="updateReply" parameterType="reply">
+		<![CDATA[
+			update reply3
+			set
+			text = #{text}
+			where
+			replynum = #{replynum} and id =#{id}
 		]]>
 	</update>
 </mapper>

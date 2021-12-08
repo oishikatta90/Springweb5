@@ -18,6 +18,7 @@
 			<td class="white"></td>
 			<td class="white" colspan="3"></td>
 			<td class="white"><input type="button" value="글쓰기" onclick="location.href='write';"></td>
+			<td class="white"><a href="/"><input type="button" value="홈으로"></a>
 		</tr>
 		<tr>
 			<th>번호</th>
