@@ -21,8 +21,8 @@ public interface BoardMapper {
 	public int getTotal(String searchText);
 
 	// 검색 후의 현재 페이지 목록
-	// public ArrayList<BoardVO> listBoard(String searchText, RowBounds rd);
-	public ArrayList<BoardVO> listBoard();
+	 public ArrayList<BoardVO> listBoard(String searchText, RowBounds rd);
+	//public ArrayList<BoardVO> listBoard();
 
 	// 글 번호와 아이디로 해당 게시글 삭제
 	public int deleteBoard(BoardVO board);

@@ -2,6 +2,7 @@ package com.spring.web5.dao;
 
 import java.util.ArrayList;
 
+import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -14,9 +15,12 @@ public class BoardDAO {
 	@Autowired
 	SqlSession sqlSession;
 
-	public ArrayList<BoardVO> listBoard() {
+	public ArrayList<BoardVO> listBoard(String searchText, int startRecord, int countPerPage) {
 		BoardMapper mapper = sqlSession.getMapper(BoardMapper.class);
-		ArrayList<BoardVO> boardList = mapper.listBoard();
+		RowBounds rb = new RowBounds(startRecord, countPerPage);
+
+		ArrayList<BoardVO> boardList = mapper.listBoard(searchText, rb);
+		
 		return boardList;
 	}
 
@@ -48,6 +52,13 @@ public class BoardDAO {
 		int result = mapper.deleteBoard(board);
 		return result;
 
+	}
+	
+	public int getTotal(String searchText) {
+		BoardMapper mapper = sqlSession.getMapper(BoardMapper.class);
+		int total = mapper.getTotal(searchText);
+		 
+		return total;
 	}
 
 	public int insertReply(ReplyVO reply) {

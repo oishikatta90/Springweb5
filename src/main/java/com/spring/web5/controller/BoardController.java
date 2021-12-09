@@ -10,9 +10,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.spring.web5.dao.BoardDAO;
+import com.spring.web5.util.PageNavigator;
 import com.spring.web5.vo.BoardVO;
 import com.spring.web5.vo.CustomerVO;
 import com.spring.web5.vo.ReplyVO;
@@ -31,9 +33,20 @@ public class BoardController {
 	final String uploadPath = "/boardfile";
 
 	@RequestMapping(value = "list", method = RequestMethod.GET)
-	public String list(Model model) {
-		ArrayList<BoardVO> boardList = dao.listBoard();
+	public String list(@RequestParam(value = "page", defaultValue = "1") int page,
+			@RequestParam(value = "searchText", defaultValue = "") String searchText, Model model) {
+		logger.debug("page : {}, searchText : {}" , page, searchText);
+		//페이지 계산을 위한 게시물 개수 조회
+		int total = dao.getTotal(searchText);
+		
+		//페이징 객체 생성
+		PageNavigator navi = new PageNavigator(countPerPage, pagePerGroup, page, total);
+		//게시글 목록 읽어오기
+		ArrayList<BoardVO> boardList = dao.listBoard(searchText, navi.getStartRecord(), navi.getCountPerPage());
+		
 		model.addAttribute("boardList", boardList);
+		model.addAttribute("searchText", searchText);
+		model.addAttribute("navi", navi);
 		return "board/list";
 	}
 
@@ -92,11 +105,11 @@ public class BoardController {
 		return "redirect:read?boardnum=" + board.getBoardnum();
 
 	}
-	
-	//게시글 삭제
-	@RequestMapping(value="delete", method=RequestMethod.GET)
+
+	// 게시글 삭제
+	@RequestMapping(value = "delete", method = RequestMethod.GET)
 	public String delete(int boardnum, @ModelAttribute("customer") CustomerVO customer) {
-		//삭제할 글 번호와 본인 글인지 확인할 로그인 아이디
+		// 삭제할 글 번호와 본인 글인지 확인할 로그인 아이디
 		BoardVO board = new BoardVO();
 		board.setBoardnum(boardnum);
 		board.setId(customer.getCustid());
@@ -123,14 +136,14 @@ public class BoardController {
 		dao.deleteReply(reply);
 		return "redirect:read?boardnum=" + reply.getBoardnum();
 	}
-	
-	//댓글 수정
-	@RequestMapping(value="replyEdit", method=RequestMethod.POST)
-	public String updateReply(ReplyVO reply, @ModelAttribute("customer")CustomerVO customer) {
+
+	// 댓글 수정
+	@RequestMapping(value = "replyEdit", method = RequestMethod.POST)
+	public String updateReply(ReplyVO reply, @ModelAttribute("customer") CustomerVO customer) {
 		String id = customer.getCustid();
 		reply.setId(id);
 		dao.updateReply(reply);
-		return "redirect:read?boardnum=" +reply.getBoardnum();
+		return "redirect:read?boardnum=" + reply.getBoardnum();
 	}
 
 }

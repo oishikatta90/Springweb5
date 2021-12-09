@@ -6,12 +6,13 @@
 
 <mapper namespace="com.spring.web5.dao.BoardMapper">
 	<!-- 게시글 목록 -->
-	<select id="listBoard" resultType="board">
-		<![CDATA[
+	<select id="listBoard" resultType="board" parameterType="string">
 			select *
 			from board3
+			<if test="_parameter != null">
+				where title like '%' || #{searchText} || '%'
+			</if>
 			order by boardnum desc
-		]]>
 	</select>
 
 	<!-- 게시글 읽기 -->
@@ -52,6 +53,15 @@
 		]]>
 	</delete>
 	
+	<!-- 전체 글 개수 조회 -->
+	<select id="getTotal" parameterType="String" resultType="int">
+		
+			select count(*) from board3
+			<if test="_parameter != null">
+				where title like '%' || #{searchText} || '%'
+			</if>
+	
+	</select>
 	<!-- 조회수 증가  -->
 	<update id="addHits" parameterType="int">
 		<![CDATA[
