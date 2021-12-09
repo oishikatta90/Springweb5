@@ -23,6 +23,9 @@ public class BoardDAO {
 	public BoardVO getBoard(int boardnum) {
 		BoardMapper mapper = sqlSession.getMapper(BoardMapper.class);
 		BoardVO board = mapper.getBoard(boardnum);
+		
+		//조회수 증가
+		mapper.addHits(boardnum);
 
 		return board;
 	}
@@ -36,6 +39,13 @@ public class BoardDAO {
 	public int updateBoard(BoardVO board) {
 		BoardMapper mapper = sqlSession.getMapper(BoardMapper.class);
 		int result = mapper.updateBoard(board);
+		return result;
+
+	}
+	
+	public int deleteBoard(BoardVO board) {
+		BoardMapper mapper = sqlSession.getMapper(BoardMapper.class);
+		int result = mapper.deleteBoard(board);
 		return result;
 
 	}

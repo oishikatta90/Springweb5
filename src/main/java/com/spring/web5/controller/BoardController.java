@@ -92,6 +92,17 @@ public class BoardController {
 		return "redirect:read?boardnum=" + board.getBoardnum();
 
 	}
+	
+	//게시글 삭제
+	@RequestMapping(value="delete", method=RequestMethod.GET)
+	public String delete(int boardnum, @ModelAttribute("customer") CustomerVO customer) {
+		//삭제할 글 번호와 본인 글인지 확인할 로그인 아이디
+		BoardVO board = new BoardVO();
+		board.setBoardnum(boardnum);
+		board.setId(customer.getCustid());
+		dao.deleteBoard(board);
+		return "redirect:list";
+	}
 
 	// 리플 달기
 	@RequestMapping(value = "replyWrite", method = RequestMethod.POST)

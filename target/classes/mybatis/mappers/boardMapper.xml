@@ -42,6 +42,24 @@
 			boardnum = #{boardnum} and id = #{id}
 		]]>
 	</update>
+	
+	<!--  게시글 삭제 -->
+	<delete id="deleteBoard" parameterType="board">
+		<![CDATA[
+			delete from board3
+			where boardnum = #{boardnum}
+			and id = #{id}
+		]]>
+	</delete>
+	
+	<!-- 조회수 증가  -->
+	<update id="addHits" parameterType="int">
+		<![CDATA[
+			update board3
+			set hits = hits + 1
+			where boardnum = #{boardnum}
+		]]>
+	</update>
 
 	<!-- 리플 저장 -->
 	<insert id="insertReply">

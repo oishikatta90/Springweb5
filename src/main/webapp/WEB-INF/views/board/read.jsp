@@ -9,6 +9,11 @@
 <link rel="stylesheet" type="text/css"
 	href="../resources/css/default.css">
 <script type="text/javascript">
+	function deleteCheck(boardnum) {
+		if (confirm("정말 삭제하시겠습니까?")) {
+			location.href = 'delete?boardnum=' + boardnum;
+			}
+		}
 	function replyFormCheck() {
 		var replytxt = document.getElementById("replytxt");
 		if (replytxt.value.length < 1) {
