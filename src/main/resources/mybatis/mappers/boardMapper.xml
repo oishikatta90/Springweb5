@@ -7,12 +7,12 @@
 <mapper namespace="com.spring.web5.dao.BoardMapper">
 	<!-- 게시글 목록 -->
 	<select id="listBoard" resultType="board" parameterType="string">
-			select *
-			from board3
-			<if test="_parameter != null">
-				where title like '%' || #{searchText} || '%'
-			</if>
-			order by boardnum desc
+		select *
+		from board3
+		<if test="_parameter != null">
+			where title like '%' || #{searchText} || '%'
+		</if>
+		order by boardnum desc
 	</select>
 
 	<!-- 게시글 읽기 -->
@@ -27,10 +27,26 @@
 
 	<!-- 게시글 저장 -->
 	<insert id="insertBoard" parameterType="board">
-		<![CDATA[
-			insert into board3(boardnum, id, title, content)
-			values(board3_seq.nextval, #{id}, #{title}, #{content})
-		]]>
+		insert into board3 (
+		boardnum
+		, id
+		, title
+		, content
+		<if test="originalfile != null and savefile != null">
+			, originalfile
+			, savefile
+		</if>
+		)
+		values (
+		board3_seq.nextval
+		, #{id}
+		, #{title}
+		, #{content}
+		<if test="originalfile != null and savefile != null">
+			, #{originalfile}
+			, #{savefile}
+		</if>
+		)
 	</insert>
 
 	<!-- 게시글 수정 -->
@@ -43,8 +59,8 @@
 			boardnum = #{boardnum} and id = #{id}
 		]]>
 	</update>
-	
-	<!--  게시글 삭제 -->
+
+	<!-- 게시글 삭제 -->
 	<delete id="deleteBoard" parameterType="board">
 		<![CDATA[
 			delete from board3
@@ -52,17 +68,17 @@
 			and id = #{id}
 		]]>
 	</delete>
-	
+
 	<!-- 전체 글 개수 조회 -->
 	<select id="getTotal" parameterType="String" resultType="int">
-		
-			select count(*) from board3
-			<if test="_parameter != null">
-				where title like '%' || #{searchText} || '%'
-			</if>
-	
+
+		select count(*) from board3
+		<if test="_parameter != null">
+			where title like '%' || #{searchText} || '%'
+		</if>
+
 	</select>
-	<!-- 조회수 증가  -->
+	<!-- 조회수 증가 -->
 	<update id="addHits" parameterType="int">
 		<![CDATA[
 			update board3
@@ -100,8 +116,8 @@
 			id = #{id}
 		]]>
 	</delete>
-	
-	<!--  댓글 수정 -->
+
+	<!-- 댓글 수정 -->
 	<update id="updateReply" parameterType="reply">
 		<![CDATA[
 			update reply3

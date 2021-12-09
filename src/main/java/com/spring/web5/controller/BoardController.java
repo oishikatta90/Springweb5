@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.web5.dao.BoardDAO;
+import com.spring.web5.util.FileService;
 import com.spring.web5.util.PageNavigator;
 import com.spring.web5.vo.BoardVO;
 import com.spring.web5.vo.CustomerVO;
@@ -72,15 +74,25 @@ public class BoardController {
 	public String writeForm() {
 		return "board/writeForm";
 	}
-
+	
+	//게시글 저장
 	@RequestMapping(value = "write", method = RequestMethod.POST)
-	public String write(@ModelAttribute("customer") CustomerVO customer, BoardVO board, Model model) {
+	public String write(@ModelAttribute("customer") CustomerVO customer, BoardVO board, Model model, MultipartFile upload) {
 		logger.debug("board : {}", board);
 
 		// 세선에서 로그인 사용자의 아이디 읽어오기
 		logger.debug("customer : {} ", customer);
 
 		board.setId(customer.getCustid());
+		
+		//첨부파일이 있는 경우 지정된 경로에 파일을 저장
+		//원본 파일명과 저장된 파일명을 Board 객체에 저장
+		if (!upload.isEmpty()) {
+			String savedFile = FileService.saveFile(upload, uploadPath);
+			board.setOriginalfile(upload.getOriginalFilename());
+			board.setSavedfile(savedFile);
+		}
+		
 		// board객체를 DB에 전달
 		dao.insertBoard(board);
 		return "redirect:list";

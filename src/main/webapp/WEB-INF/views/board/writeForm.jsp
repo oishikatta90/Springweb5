@@ -26,7 +26,7 @@
 <body>
 	<div class="centerdiv">
 		<h2>[ 글쓰기 ]</h2>
-		<form id="writeForm" action="write" method="post" onsubmit="return formCheck();">
+		<form id="writeForm" action="write" method="post" encType="multipart/form-data" onsubmit="return formCheck();">
 			<table>
 				<tr>
 					<th>제목</th>
