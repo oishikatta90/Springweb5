@@ -44,15 +44,15 @@ public class BoardController {
 	@RequestMapping(value = "list", method = RequestMethod.GET)
 	public String list(@RequestParam(value = "page", defaultValue = "1") int page,
 			@RequestParam(value = "searchText", defaultValue = "") String searchText, Model model) {
-		logger.debug("page : {}, searchText : {}" , page, searchText);
-		//페이지 계산을 위한 게시물 개수 조회
+		logger.debug("page : {}, searchText : {}", page, searchText);
+		// 페이지 계산을 위한 게시물 개수 조회
 		int total = dao.getTotal(searchText);
-		
-		//페이징 객체 생성
+
+		// 페이징 객체 생성
 		PageNavigator navi = new PageNavigator(countPerPage, pagePerGroup, page, total);
-		//게시글 목록 읽어오기
+		// 게시글 목록 읽어오기
 		ArrayList<BoardVO> boardList = dao.listBoard(searchText, navi.getStartRecord(), navi.getCountPerPage());
-		
+
 		model.addAttribute("boardList", boardList);
 		model.addAttribute("searchText", searchText);
 		model.addAttribute("navi", navi);
@@ -81,25 +81,26 @@ public class BoardController {
 	public String writeForm() {
 		return "board/writeForm";
 	}
-	
-	//게시글 저장
+
+	// 게시글 저장
 	@RequestMapping(value = "write", method = RequestMethod.POST)
-	public String write(@ModelAttribute("customer") CustomerVO customer, BoardVO board, Model model, MultipartFile upload) {
+	public String write(@ModelAttribute("customer") CustomerVO customer, BoardVO board, Model model,
+			MultipartFile upload) {
 		logger.debug("board : {}", board);
 
 		// 세선에서 로그인 사용자의 아이디 읽어오기
 		logger.debug("customer : {} ", customer);
 
 		board.setId(customer.getCustid());
-		
-		//첨부파일이 있는 경우 지정된 경로에 파일을 저장
-		//원본 파일명과 저장된 파일명을 Board 객체에 저장
+
+		// 첨부파일이 있는 경우 지정된 경로에 파일을 저장
+		// 원본 파일명과 저장된 파일명을 Board 객체에 저장
 		if (!upload.isEmpty()) {
 			String savedFile = FileService.saveFile(upload, uploadPath);
 			board.setOriginalfile(upload.getOriginalFilename());
 			board.setSavedfile(savedFile);
 		}
-		
+
 		// board객체를 DB에 전달
 		dao.insertBoard(board);
 		return "redirect:list";
@@ -115,14 +116,37 @@ public class BoardController {
 	}
 
 	@RequestMapping(value = "edit", method = RequestMethod.POST)
-	public String edit(BoardVO board, @ModelAttribute("customer") CustomerVO customer) {
+	public String edit(BoardVO board, @ModelAttribute("customer") CustomerVO customer, MultipartFile upload) {
+		// 수정할 글이 본인 글인지 확인
 		String id = customer.getCustid();
-		if (id.equals(board.getId())) {
-			dao.updateBoard(board);
+		BoardVO oldBoard = dao.getBoard(board.getBoardnum());
+		if (oldBoard == null || !oldBoard.getId().equals(id)) {
+			return "redirect:list";
+		}
+		// 수정할 보드 정보에 로그인 아이디 저장
+		board.setId(id);
+
+		// 기존의 첨부파일이 있으면 기존 파일을 삭제하고 다시 업로드
+		if (!upload.isEmpty()) {
+			// 기존 글에서 첨부된 파일의 실제 저장된 이름을 가져온다.
+			String savedFile = oldBoard.getSavedfile();
+			// 기존의 파일ㅇ ㅣ있으면 삭제
+			if (savedFile != null) {
+				FileService.deleteFile(uploadPath + "/" + savedFile);
+			}
+				
+				//새로운 파일 업로드
+				savedFile = FileService.saveFile(upload, uploadPath);
+			
+				//수정 정보에 새로 저장된 파일명과 원래 파일명을 저장
+				board.setOriginalfile(upload.getOriginalFilename());
+				board.setSavedfile(savedFile);
+			
 		}
 
-		return "redirect:read?boardnum=" + board.getBoardnum();
-
+			dao.updateBoard(board);
+		
+			return "redirect:read?boardnum=" + board.getBoardnum();
 	}
 
 	// 게시글 삭제
@@ -132,7 +156,14 @@ public class BoardController {
 		BoardVO board = new BoardVO();
 		board.setBoardnum(boardnum);
 		board.setId(customer.getCustid());
-		dao.deleteBoard(board);
+		
+		//첨부된 파일이 있으면 삭제
+		String savedFile = dao.getBoard(boardnum).getSavedfile();
+				
+		int result = dao.deleteBoard(board);
+		if (result == 1 && savedFile != null) {
+			FileService.deleteFile(uploadPath + "/" + savedFile);
+		}
 		return "redirect:list";
 	}
 
@@ -164,33 +195,34 @@ public class BoardController {
 		dao.updateReply(reply);
 		return "redirect:read?boardnum=" + reply.getBoardnum();
 	}
-	
-	//파일 다운로드
-	@RequestMapping(value="download", method=RequestMethod.GET)
+
+	// 파일 다운로드
+	@RequestMapping(value = "download", method = RequestMethod.GET)
 	public String fileDownload(int boardnum, HttpServletResponse response) {
 		BoardVO board = dao.getBoard(boardnum);
-		logger.debug("board {} " , board);
+		logger.debug("board {} ", board);
 		String originalFile = board.getOriginalfile();
 		try {
-			response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(originalFile, "UTF-8"));
+			response.setHeader("Content-Disposition",
+					"attachment;filename=" + URLEncoder.encode(originalFile, "UTF-8"));
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		//저장된 파일의 경로지정
-		String fullPath = uploadPath+"/"+board.getSavedfile();
-		
-		//서버의 파일을 읽을 입력 스트림과 클라이언트에게 전달할 출력 스트림 작성
+
+		// 저장된 파일의 경로지정
+		String fullPath = uploadPath + "/" + board.getSavedfile();
+
+		// 서버의 파일을 읽을 입력 스트림과 클라이언트에게 전달할 출력 스트림 작성
 		FileInputStream fileIn = null;
 		ServletOutputStream fileOut = null;
 		try {
 			fileIn = new FileInputStream(fullPath);
 			fileOut = response.getOutputStream();
-			
-			//파일 관련 유틸
+
+			// 파일 관련 유틸
 			FileCopyUtils.copy(fileIn, fileOut);
-			
+
 			fileIn.close();
 			fileOut.close();
 		} catch (Exception e) {

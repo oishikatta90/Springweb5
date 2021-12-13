@@ -26,7 +26,7 @@
 <body>
 	<div class="centerdiv">
 		<h2>[ 게시글 수정 ]</h2>
-		<form action="edit" method="post" onsubmit="formCheck();">
+		<form action="edit" method="post" enctype="multipart/form-data" onsubmit="formCheck();">
 			<table>
 				<tr>
 					<th>제목</th>
@@ -40,7 +40,7 @@
 				</tr>
 				<tr>
 					<th>파일첨부</th>
-					<td><input type="file" name="upload" size="30"></td>
+					<td><input type="file" name="upload" size="30">${board.originalfile }</td>
 				</tr>
 				<tr>
 					<td colspan="2" class="white center"><input type="submit"
