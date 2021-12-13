@@ -1,12 +1,19 @@
 package com.spring.web5.controller;
 
+import java.io.FileInputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -156,6 +163,40 @@ public class BoardController {
 		reply.setId(id);
 		dao.updateReply(reply);
 		return "redirect:read?boardnum=" + reply.getBoardnum();
+	}
+	
+	//파일 다운로드
+	@RequestMapping(value="download", method=RequestMethod.GET)
+	public String fileDownload(int boardnum, HttpServletResponse response) {
+		BoardVO board = dao.getBoard(boardnum);
+		logger.debug("board {} " , board);
+		String originalFile = board.getOriginalfile();
+		try {
+			response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(originalFile, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		//저장된 파일의 경로지정
+		String fullPath = uploadPath+"/"+board.getSavedfile();
+		
+		//서버의 파일을 읽을 입력 스트림과 클라이언트에게 전달할 출력 스트림 작성
+		FileInputStream fileIn = null;
+		ServletOutputStream fileOut = null;
+		try {
+			fileIn = new FileInputStream(fullPath);
+			fileOut = response.getOutputStream();
+			
+			//파일 관련 유틸
+			FileCopyUtils.copy(fileIn, fileOut);
+			
+			fileIn.close();
+			fileOut.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }

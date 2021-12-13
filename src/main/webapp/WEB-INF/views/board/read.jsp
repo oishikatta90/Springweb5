@@ -63,19 +63,23 @@
 			</tr>
 			<tr>
 				<th>조회수</th>
-				<td>${board.hits }
+				<td>${board.hits }</td>
 			</tr>
 			<tr>
 				<th>제목</th>
-				<td>${board.title }
+				<td>${board.title }</td>
 			</tr>
 			<tr>
 				<th>내용</th>
-				<td>${board.content }
+				<td>${board.content }</td>
 			</tr>
 			<tr>
 				<th>첨부파일</th>
-				<td>${board.originalfile }
+				<td>
+					<c:if test="${board.originalfile != null}">
+						<a href="download?boardnum=${board.boardnum }">${board.originalfile }</a>
+					</c:if>
+				</td>
 			</tr>
 		</table>
 		<div id="navigator">
